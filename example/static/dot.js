@@ -4,7 +4,7 @@
  */
 $(document).ready(function () {
     // localhost port:8888
-    $.get("http://127.0.0.1:8888/dig", {
+    $.get("http://dev.dig.com/dig", {
         "time": gettime(),
         "url": geturl(),
         "refer": getrefer(),
