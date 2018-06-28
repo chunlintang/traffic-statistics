@@ -5,9 +5,10 @@ import (
 	"strings"
 	"strconv"
 	"net/url"
-	"io/ioutil"
 	"math/rand"
 	"time"
+	"os"
+	"fmt"
 )
 
 var uaList = []string{
@@ -114,7 +115,7 @@ func makeLog(current, refer, ua string) string {
 	u.Set("ua", ua)
 	paramsStr := u.Encode()
 
-	template := "127.0.0.1 - - [26/Jun/2018:23:17:44 +0800] \"GET /dig?{$paramsStr} HTTP/1.1\" 200 43 \"-\" \"{$ua}\" \"-\"\"
+	template := "127.0.0.1 - - [26/Jun/2018:23:17:44 +0800] \"GET /dig?{$paramsStr} HTTP/1.1\" 200 43 \"-\" \"{$ua}\" \"-\""
 	log := strings.Replace(template, "{$paramsStr}", paramsStr, -1)
 	log = strings.Replace(log, "{$ua}", ua, -1)
 
@@ -140,12 +141,18 @@ func main() {
 	res := ruleResource()
 	list := buildUrl(res)
 
+	var logStr string
 	for i := 0; i <= *total; i++ {
 		currentUrl := list[randInt(0, len(list)-1)]
 		referUrl := list[randInt(0, len(list)-1)]
 		ua := uaList[randInt(0, len(uaList)-1)]
 
-		logStr := makeLog(currentUrl, referUrl, ua)
-		ioutil.WriteFile(*filePath, []byte(logStr), 0644)
+		logStr = logStr + makeLog(currentUrl, referUrl, ua) + "\n"
+		//ioutil.WriteFile(*filePath, []byte(logStr), 0644)
 	}
+	fd, _ := os.OpenFile(*filePath, os.O_RDWR|os.O_APPEND, 0644)
+	fd.Write([]byte(logStr))
+	fd.Close()
+
+	fmt.Println("done")
 }
